@@ -3,10 +3,14 @@ import '../css/style.scss';
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+
+import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass.js";
+
 import { LuminosityShader } from 'three/examples/jsm/shaders/LuminosityShader.js';
 import { SobelOperatorShader } from 'three/examples/jsm/shaders/SobelOperatorShader.js';
+
+import { DotScreenShader } from "three/examples/jsm/shaders/DotScreenShader.js";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
@@ -40,12 +44,14 @@ class Main {
     this.effectObj = {
       glitch: false,
       sobel: false,
+      dotscreen: false,
     }
 
     // post processing
     this.composer = null;
     this.effectSobel = null;
     this.effectGlitch = null;
+    this.effectDotScreen = null;
 
 
     this._init();
@@ -53,6 +59,7 @@ class Main {
     this._setComposer();
     this._setEffectSobel();
     this._setEffectGlitch();
+    this._setEffectDotScreen();
 
     this._update();
     this._addEvent();
@@ -76,7 +83,8 @@ class Main {
 
   _setGui() {
     this.gui.add(this.effectObj, 'glitch').name('グリッチノイズ');
-    this.gui.add(this.effectObj, 'sobel').name('Sobelフィルタ');
+    this.gui.add(this.effectObj, 'sobel').name('エッジ検出');
+    this.gui.add(this.effectObj, 'dotscreen').name('ドット エフェクト');
 
     this.gui.onChange((e) => {
       const guiProperty = e.property;
@@ -96,6 +104,14 @@ class Main {
           this._offEffectSobel();
         }
       }
+
+      if(guiProperty === 'dotscreen') {
+        if(e.value) {
+          this._onEffectDotScreen();
+        } else {
+          this._offEffectDotScreen();
+        }
+      }
     })
   }
 
@@ -113,7 +129,8 @@ class Main {
     const renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(renderPass);   
   }
-  
+ 
+  // Sobel
   _setEffectSobel() {
     const effectGrayScale = new ShaderPass(LuminosityShader);
     this.composer.addPass(effectGrayScale);
@@ -126,15 +143,14 @@ class Main {
     }
     this.composer.addPass(this.effectSobel);
   }
-
   _onEffectSobel() {
     this.effectSobel.enabled = true;
   }
-
   _offEffectSobel() {
     this.effectSobel.enabled = false;
   }
   
+  // Glitch
   _setEffectGlitch() {
     this.effectGlitch = new GlitchPass();
     if(this.effectObj.glitch === false) {
@@ -142,14 +158,29 @@ class Main {
     }
     this.composer.addPass(this.effectGlitch);
   }
-
   _onEffectGlitch() {
     this.effectGlitch.enabled = true;
   }
-
   _offEffectGlitch() {
     this.effectGlitch.enabled = false;
   }
+
+  // DotScreen
+  _setEffectDotScreen() {
+    this.effectDotScreen = new ShaderPass(DotScreenShader);
+    this.effectDotScreen.uniforms['scale'].value = 4;
+    if(this.effectObj.dotscreen === false) {
+      this._offEffectDotScreen();
+    }
+    this.composer.addPass(this.effectDotScreen);
+  }
+  _onEffectDotScreen() {
+    this.effectDotScreen.enabled = true;
+  }
+  _offEffectDotScreen() {
+    this.effectDotScreen.enabled = false;
+  }
+
 
   _addMesh() {
     const geometry = new THREE.BoxGeometry(100, 100, 100);
