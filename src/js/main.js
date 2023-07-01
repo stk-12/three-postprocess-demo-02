@@ -3,13 +3,14 @@ import '../css/style.scss';
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass.js";
-
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { LuminosityShader } from 'three/examples/jsm/shaders/LuminosityShader.js';
 import { SobelOperatorShader } from 'three/examples/jsm/shaders/SobelOperatorShader.js';
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+
+import GUI from "lil-gui";
 
 
 class Main {
@@ -33,6 +34,12 @@ class Main {
     this.mesh = null;
 
     this.controls = null;
+
+    this.gui = new GUI();
+
+    this.effectObj = {
+      glitch: false,
+    }
 
     // post processing
     this.composer = null;
@@ -66,6 +73,22 @@ class Main {
     this.controls.enableDamping = true;
   }
 
+  _setGui() {
+    this.gui.add(this.effectObj, 'glitch').name('Glitch Noise');
+
+    this.gui.onChange((e) => {
+      const guiProperty = e.property;
+
+      if(guiProperty === 'glitch') {
+        if(e.value) {
+          this._onEffectGlitch();
+        } else {
+          this._offEffectGlitch();
+        }
+      }
+    })
+  }
+
   _setLight() {
     const light = new THREE.DirectionalLight(0xffffff, 1.5);
     light.position.set(1, 1, 80);
@@ -93,7 +116,18 @@ class Main {
   
   _setEffectGlitch() {
     this.effectGlitch = new GlitchPass();
+    if(this.effectObj.glitch === false) {
+      this._offEffectGlitch();
+    }
     this.composer.addPass(this.effectGlitch);
+  }
+
+  _onEffectGlitch() {
+    this.effectGlitch.enabled = true;
+  }
+
+  _offEffectGlitch() {
+    this.effectGlitch.enabled = false;
   }
 
   _addMesh() {
@@ -107,6 +141,7 @@ class Main {
   _init() {
     this._setCamera();
     this._setControlls();
+    this._setGui();
     this._setLight();
     this._addMesh();
   }
