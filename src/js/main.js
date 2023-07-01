@@ -39,6 +39,7 @@ class Main {
 
     this.effectObj = {
       glitch: false,
+      sobel: false,
     }
 
     // post processing
@@ -74,7 +75,8 @@ class Main {
   }
 
   _setGui() {
-    this.gui.add(this.effectObj, 'glitch').name('Glitch Noise');
+    this.gui.add(this.effectObj, 'glitch').name('グリッチノイズ');
+    this.gui.add(this.effectObj, 'sobel').name('Sobelフィルタ');
 
     this.gui.onChange((e) => {
       const guiProperty = e.property;
@@ -84,6 +86,14 @@ class Main {
           this._onEffectGlitch();
         } else {
           this._offEffectGlitch();
+        }
+      }
+
+      if(guiProperty === 'sobel') {
+        if(e.value) {
+          this._onEffectSobel();
+        } else {
+          this._offEffectSobel();
         }
       }
     })
@@ -111,7 +121,18 @@ class Main {
     this.effectSobel = new ShaderPass(SobelOperatorShader);
     this.effectSobel.uniforms['resolution'].value.x = window.innerWidth * window.devicePixelRatio;
     this.effectSobel.uniforms['resolution'].value.y = window.innerHeight * window.devicePixelRatio;
+    if(this.effectObj.sobel === false) {
+      this._offEffectSobel();
+    }
     this.composer.addPass(this.effectSobel);
+  }
+
+  _onEffectSobel() {
+    this.effectSobel.enabled = true;
+  }
+
+  _offEffectSobel() {
+    this.effectSobel.enabled = false;
   }
   
   _setEffectGlitch() {
