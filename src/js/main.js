@@ -71,6 +71,8 @@ class Main {
     this._setEffectRGBShift();
     this._setEffectBloom();
 
+    this._setBodyClass();
+
     this._update();
     this._addEvent();
   }
@@ -99,6 +101,9 @@ class Main {
     this.gui.add(this.effectObj, 'bloom').name('光彩');
 
     this.gui.onChange((e) => {
+
+      this._setBodyClass();
+
       const guiProperty = e.property;
 
       if(guiProperty === 'glitch') {
@@ -143,6 +148,14 @@ class Main {
     })
   }
 
+  _setBodyClass() {
+    if(this.effectObj.sobel || this.effectObj.bloom) {
+      document.body.classList.add('is-dark');
+    } else {
+      document.body.classList.remove('is-dark');
+    }
+  }
+
   _setLight() {
     const light = new THREE.DirectionalLight(0xffffff, 1.5);
     light.position.set(1, 1, 80);
@@ -175,11 +188,9 @@ class Main {
   }
   _onEffectSobel() {
     this.effectSobel.enabled = true;
-    document.body.classList.add('is-dark');
   }
   _offEffectSobel() {
     this.effectSobel.enabled = false;
-    document.body.classList.remove('is-dark');
   }
   
   // Glitch
@@ -241,11 +252,9 @@ class Main {
   }
   _onEffectBloom() {
     this.effectBloom.enabled = true;
-    document.body.classList.add('is-dark');
   }
   _offEffectBloom() {
     this.effectBloom.enabled = false;
-    document.body.classList.remove('is-dark');
   }
 
 
