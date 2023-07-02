@@ -14,6 +14,8 @@ import { DotScreenShader } from "three/examples/jsm/shaders/DotScreenShader.js";
 
 import { RGBShiftShader } from "three/examples/jsm/shaders/RGBShiftShader.js";
 
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
 import GUI from "lil-gui";
@@ -48,6 +50,7 @@ class Main {
       sobel: true,
       dotscreen: true,
       rgbshift: true,
+      bloom: false,
     }
 
     // post processing
@@ -56,6 +59,7 @@ class Main {
     this.effectGlitch = null;
     this.effectDotScreen = null;
     this.effectRGBShift = null;
+    this.effectBloom = null;
 
 
     this._init();
@@ -65,6 +69,7 @@ class Main {
     this._setEffectGlitch();
     this._setEffectDotScreen();
     this._setEffectRGBShift();
+    this._setEffectBloom();
 
     this._update();
     this._addEvent();
@@ -91,6 +96,7 @@ class Main {
     this.gui.add(this.effectObj, 'sobel').name('エッジ検出');
     this.gui.add(this.effectObj, 'dotscreen').name('ドット エフェクト');
     this.gui.add(this.effectObj, 'rgbshift').name('RGBシフト');
+    this.gui.add(this.effectObj, 'bloom').name('光彩');
 
     this.gui.onChange((e) => {
       const guiProperty = e.property;
@@ -124,6 +130,14 @@ class Main {
           this._onEffectRGBShift();
         } else {
           this._offEffectRGBShift();
+        }
+      }
+
+      if(guiProperty === 'bloom') {
+        if(e.value) {
+          this._onEffectBloom();
+        } else {
+          this._offEffectBloom();
         }
       }
     })
@@ -213,6 +227,25 @@ class Main {
   }
   _offEffectRGBShift() {
     this.effectRGBShift.enabled = false;
+  }
+
+  // Bloom
+  _setEffectBloom() {
+    this.effectBloom = new UnrealBloomPass();
+    if(this.effectObj.bloom === false) {
+      this._offEffectBloom();
+    } else {
+      this._onEffectBloom();
+    }
+    this.composer.addPass(this.effectBloom);
+  }
+  _onEffectBloom() {
+    this.effectBloom.enabled = true;
+    document.body.classList.add('is-dark');
+  }
+  _offEffectBloom() {
+    this.effectBloom.enabled = false;
+    document.body.classList.remove('is-dark');
   }
 
 
