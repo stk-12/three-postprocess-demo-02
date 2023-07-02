@@ -12,6 +12,8 @@ import { SobelOperatorShader } from 'three/examples/jsm/shaders/SobelOperatorSha
 
 import { DotScreenShader } from "three/examples/jsm/shaders/DotScreenShader.js";
 
+import { RGBShiftShader } from "three/examples/jsm/shaders/RGBShiftShader.js";
+
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
 import GUI from "lil-gui";
@@ -45,6 +47,7 @@ class Main {
       glitch: false,
       sobel: false,
       dotscreen: false,
+      rgbshift: false,
     }
 
     // post processing
@@ -52,6 +55,7 @@ class Main {
     this.effectSobel = null;
     this.effectGlitch = null;
     this.effectDotScreen = null;
+    this.effectRGBShift = null;
 
 
     this._init();
@@ -60,6 +64,7 @@ class Main {
     this._setEffectSobel();
     this._setEffectGlitch();
     this._setEffectDotScreen();
+    this._setEffectRGBShift();
 
     this._update();
     this._addEvent();
@@ -85,6 +90,7 @@ class Main {
     this.gui.add(this.effectObj, 'glitch').name('グリッチノイズ');
     this.gui.add(this.effectObj, 'sobel').name('エッジ検出');
     this.gui.add(this.effectObj, 'dotscreen').name('ドット エフェクト');
+    this.gui.add(this.effectObj, 'rgbshift').name('RGBシフト');
 
     this.gui.onChange((e) => {
       const guiProperty = e.property;
@@ -110,6 +116,14 @@ class Main {
           this._onEffectDotScreen();
         } else {
           this._offEffectDotScreen();
+        }
+      }
+
+      if(guiProperty === 'rgbshift') {
+        if(e.value) {
+          this._onEffectRGBShift();
+        } else {
+          this._offEffectRGBShift();
         }
       }
     })
@@ -179,6 +193,22 @@ class Main {
   }
   _offEffectDotScreen() {
     this.effectDotScreen.enabled = false;
+  }
+
+  // RGB Shift
+  _setEffectRGBShift() {
+    this.effectRGBShift = new ShaderPass(RGBShiftShader);
+    this.effectRGBShift.uniforms['amount'].value = 0.003;
+    if(this.effectObj.rgbshift === false) {
+      this._offEffectRGBShift();
+    }
+    this.composer.addPass(this.effectRGBShift);
+  }
+  _onEffectRGBShift() {
+    this.effectRGBShift.enabled = true;
+  }
+  _offEffectRGBShift() {
+    this.effectRGBShift.enabled = false;
   }
 
 
