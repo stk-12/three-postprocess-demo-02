@@ -44,10 +44,10 @@ class Main {
     this.gui = new GUI();
 
     this.effectObj = {
-      glitch: false,
-      sobel: false,
-      dotscreen: false,
-      rgbshift: false,
+      glitch: true,
+      sobel: true,
+      dotscreen: true,
+      rgbshift: true,
     }
 
     // post processing
@@ -154,14 +154,18 @@ class Main {
     this.effectSobel.uniforms['resolution'].value.y = window.innerHeight * window.devicePixelRatio;
     if(this.effectObj.sobel === false) {
       this._offEffectSobel();
+    } else {
+      this._onEffectSobel();
     }
     this.composer.addPass(this.effectSobel);
   }
   _onEffectSobel() {
     this.effectSobel.enabled = true;
+    document.body.classList.add('is-dark');
   }
   _offEffectSobel() {
     this.effectSobel.enabled = false;
+    document.body.classList.remove('is-dark');
   }
   
   // Glitch
@@ -198,7 +202,7 @@ class Main {
   // RGB Shift
   _setEffectRGBShift() {
     this.effectRGBShift = new ShaderPass(RGBShiftShader);
-    this.effectRGBShift.uniforms['amount'].value = 0.003;
+    this.effectRGBShift.uniforms['amount'].value = 0.002;
     if(this.effectObj.rgbshift === false) {
       this._offEffectRGBShift();
     }
@@ -213,7 +217,7 @@ class Main {
 
 
   _addMesh() {
-    const geometry = new THREE.BoxGeometry(100, 100, 100);
+    const geometry = new THREE.BoxGeometry(300, 300, 300);
     // const geometry = new THREE.IcosahedronGeometry(100, 0);
     const material = new THREE.MeshStandardMaterial({color: 0x444444});
     this.mesh = new THREE.Mesh(geometry, material);
